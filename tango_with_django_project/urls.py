@@ -19,7 +19,7 @@ from django.urls import include
 from rango import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.redir, name='index'), #amended original "URL/" path to redirect to "URL/rango", new location of index page
     path('rango/', include('rango.urls')),
     # The above maps any URLs starting with rango/ to be handled by our Rango program
     path('admin/', admin.site.urls),
