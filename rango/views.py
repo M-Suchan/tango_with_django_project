@@ -9,11 +9,13 @@ def redir(request):
 
 def index(request):
     category_list = Category.objects.order_by('-likes')[:5]
+    page_list = Page.objects.order_by('-views')[:5]
     # Create a context dictionairy to give context to {{ msg }} template variables in the html file
     # Usage : for {{msgname}} in html >>> 'msgname' : 'msgcontent' for each key : value pair
     context_dict = {}
     context_dict['boldmessage'] = 'Crunchy, creamy, cookie, candy, cupcake!'
     context_dict['categories'] = category_list
+    context_dict['pages'] = page_list
     # Return our rendered response
     return render(request, 'rango/index.html', context=context_dict)
 
