@@ -6,6 +6,7 @@ from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from datetime import datetime
 
 def redir(request):
     return redirect(reverse('rango:index'))
@@ -20,8 +21,12 @@ def index(request):
     context_dict['boldmessage'] = 'Crunchy, creamy, cookie, candy, cupcake!'
     context_dict['categories'] = category_list
     context_dict['pages'] = page_list
-    # Return our rendered response
-    return render(request, 'rango/index.html', context=context_dict)
+    context_dict['visits'] = int(request.COOKIES.get('visits', '1'))
+    # Obtain response early, to append cookie info
+    response = render(request, 'rango/index.html', context=context_dict)
+    # Append cookie
+    visitor_cookie_handler(request, response)
+    return response
 
 def show_category(request, category_name_slug):
     context_dict = {}
@@ -137,3 +142,19 @@ def restricted(request):
 def user_logout(request):
     logout(request)
     return redirect(reverse('rango:index'))
+
+# Cookie handler helper func
+def visitor_cookie_handler(request, response):
+    visits = int(request.COOKIES.get('visits', '1'))
+    last_visit_cookie = request.COOKIES.get('last_visit', str(datetime.now()))
+    last_visit_time = datetime.strptime(last_visit_cookie[:-7],'%Y-%m-%d %H:%M:%S')
+    # If it's been more than a day since the last visit...
+    if (datetime.now() - last_visit_time).days > 0:
+        visits = visits + 1
+        # Update the last visit cookie now that we have updated the count
+        response.set_cookie('last_visit', str(datetime.now()))
+    else:
+        # Set the last visit cookie
+        response.set_cookie('last_visit', last_visit_cookie)
+        # Update/set the visits cookie
+        response.set_cookie('visits', visits)
